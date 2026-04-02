@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Hooks vs Vue Composition API</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --react: #61DAFB;
+    --vue: #42b883;
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a26;
+    --text: #e8e8f0;
+    --muted: #6b6b88;
+    --border: rgba(255,255,255,0.07);
+    --accent: #ff6b6b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 3rem;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-size: 0.75rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .nav-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--surface2);
+    cursor: pointer;
+    transition: background 0.3s;
+    border: none;
+  }
+  .nav-dot.active { background: var(--react); }
+  .nav-dot:nth-child(2).active { background: var(--vue); }
+
+  /* ─── SLIDES ─── */
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 4rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide::before {
+    content: attr(data-num);
+    position: absolute;
+    right: 3rem; top: 50%;
+    transform: translateY(-50%);
+    font-size: clamp(8rem, 18vw, 22rem);
+    font-weight: 800;
+    color: rgba(255,255,255,0.02);
+    line-height: 1;
+    pointer-events: none;
+    font-family: 'Space Mono', monospace;
+    user-select: none;
+  }
+
+  /* ─── SLIDE 1 — HERO ─── */
+  #slide-1 {
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 50%, rgba(97,218,251,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(66,184,131,0.06) 0%, transparent 70%),
+      var(--bg);
+    text-align: center;
+    align-items: center;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 7vw, 6rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero-title .react-color { color: var(--react); }
+  .hero-title .vue-color  { color: var(--vue); }
+  .hero-title .vs {
+    display: inline-block;
+    font-size: 0.5em;
+    color: var(--muted);
+    vertical-align: middle;
+    margin: 0 0.5rem;
+    font-weight: 400;
+  }
+
+  .hero-subtitle {
+    margin-top: 1.5rem;
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 520px;
+    line-height: 1.7;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-badges {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .badge {
+    padding: 0.45rem 1.1rem;
+    border-radius: 999px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+  }
+  .badge-react { background: rgba(97,218,251,0.1); border: 1px solid rgba(97,218,251,0.3); color: var(--react); }
+  .badge-vue   { background: rgba(66,184,131,0.1); border: 1px solid rgba(66,184,131,0.3); color: var(--vue); }
+
+  /* ─── SLIDE 2 — CONTEXTE ─── */
+  #slide-2 {
+    background: var(--bg);
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 2.5rem;
+  }
+
+  .context-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 900px;
+  }
+
+  .context-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .context-card:hover { transform: translateY(-3px); }
+  .context-card.react-card { border-top: 3px solid var(--react); }
+  .context-card.vue-card  { border-top: 3px solid var(--vue); }
+
+  .context-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .react-card::after { background: radial-gradient(circle at top left, rgba(97,218,251,0.05), transparent 60%); }
+  .vue-card::after   { background: radial-gradient(circle at top left, rgba(66,184,131,0.05), transparent 60%); }
+  .context-card:hover::after { opacity: 1; }
+
+  .card-icon {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-body {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .context-card code {
+    font-family: 'Space Mono', monospace;
+    background: var(--surface2);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.82em;
+    color: var(--text);
+  }
+
+  /* ─── SLIDE 3 — REACT HOOKS ─── */
+  #slide-3 {
+    background:
+      radial-gradient(ellipse 50% 60% at -10% 50%, rgba(97,218,251,0.04) 0%, transparent 70%),
+      var(--bg);
+  }
+
+  .hooks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1000px;
+    align-items: start;
+  }
+
+  .hooks-list { display: flex; flex-direction: column; gap: 1rem; }
+
+  .hook-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--react);
+    border-radius: 0 12px 12px 0;
+    transition: background 0.2s;
+  }
+  .hook-item:hover { background: var(--surface2); }
+
+  .hook-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--react);
+    white-space: nowrap;
+    font-weight: 700;
+    min-width: 100px;
+  }
+
+  .hook-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ─── CODE BLOCK ─── */
+  .code-block {
+    background: #0d0d15;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.7;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-dots {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: block;
+  }
+  .code-dots .d1 { background: #ff5f57; }
+  .code-dots .d2 { background: #febc2e; }
+  .code-dots .d3 { background: #28c840; }
+
+  .code-lang {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .code-body {
+    padding: 1.2rem 1.5rem;
+    overflow-x: auto;
+  }
+
+  .kw  { color: #c678dd; }
+  .fn  { color: #61afef; }
+  .str { color: #98c379; }
+  .cmt { color: #5c6370; font-style: italic; }
+  .num { color: #d19a66; }
+  .react-fn { color: var(--react); }
+  .vue-fn   { color: var(--vue); }
+  .tag  { color: #e06c75; }
+
+  /* ─── SLIDE 4 — VUE COMPOSITION ─── */
+  #slide-4 {
+    background:
+      radial-gradient(ellipse 50% 60% at 110% 50%, rgba(66,184,131,0.04) 0%, transparent 70%),
+      var(--bg);
+  }
+
+  .vue-api-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    max-width: 900px;
+  }
+
+  .api-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    transition: transform 0.2s, border-color 0.2s;
+    border-top: 2px solid var(--vue);
+  }
+  .api-pill:hover { transform: translateY(-2px); border-color: var(--vue); }
+
+  .api-pill-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--vue);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .api-pill-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ─── SLIDE 5 — AVANTAGES ─── */
+  #slide-5 { background: var(--bg); }
+
+  .advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 1000px;
+  }
+
+  .adv-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s;
+  }
+  .adv-card:hover { transform: translateY(-4px); }
+
+  .adv-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.04);
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    line-height: 1;
+  }
+
+  .adv-icon { font-size: 1.8rem; margin-bottom: 0.8rem; display: block; }
+  .adv-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .adv-body  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+  /* ─── SLIDE 6 — COMPTEUR ─── */
+  #slide-6 {
+    background:
+      radial-gradient(ellipse 40% 60% at 25% 50%, rgba(97,218,251,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 75% 50%, rgba(66,184,131,0.04) 0%, transparent 60%),
+      var(--bg);
+  }
+
+  .counter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  .counter-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .panel-header-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .react-dot { background: var(--react); box-shadow: 0 0 10px rgba(97,218,251,0.5); }
+  .vue-dot   { background: var(--vue);   box-shadow: 0 0 10px rgba(66,184,131,0.5); }
+
+  .panel-header-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .react-text { color: var(--react); }
+  .vue-text   { color: var(--vue); }
+
+  /* ─── INTERACTIVE COUNTER ─── */
+  .live-demo {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .counter-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    transition: all 0.15s ease;
+  }
+  .counter-display.react-num { color: var(--react); }
+  .counter-display.vue-num   { color: var(--vue); }
+
+  .counter-controls {
+    display: flex;
+    gap: 0.8rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1.4rem;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 700;
+  }
+  .btn-react {
+    background: rgba(97,218,251,0.1);
+    border: 1px solid rgba(97,218,251,0.3);
+    color: var(--react);
+  }
+  .btn-react:hover { background: rgba(97,218,251,0.2); transform: scale(1.05); }
+  .btn-vue {
+    background: rgba(66,184,131,0.1);
+    border: 1px solid rgba(66,184,131,0.3);
+    color: var(--vue);
+  }
+  .btn-vue:hover { background: rgba(66,184,131,0.2); transform: scale(1.05); }
+
+  .demo-label {
+    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  /* ─── DIVIDERS ─── */
+  .slide-divider {
+    width: 48px;
+    height: 3px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .divider-react { background: var(--react); }
+  .divider-vue   { background: var(--vue); }
+  .divider-both  { background: linear-gradient(90deg, var(--react), var(--vue)); }
+
+  /* ─── RÈGLES HOOKS ─── */
+  .rules-box {
+    background: rgba(255,107,107,0.07);
+    border: 1px solid rgba(255,107,107,0.2);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-top: 1rem;
+    max-width: 900px;
+  }
+
+  .rules-title {
+    font-size: 0.7rem;
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 0.7rem;
+  }
+
+  .rules-list { display: flex; flex-direction: column; gap: 0.4rem; }
+  .rule-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .rule-bullet {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+  }
+
+  .slide { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .slide.visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── SCROLL INDICATOR ─── */
+  .scroll-hint {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    transition: opacity 0.3s;
+    z-index: 50;
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 30px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: pulse 1.5s infinite;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--react), var(--vue));
+    transition: width 0.3s;
+    z-index: 200;
+  }
+
+  @media (max-width: 768px) {
+    .slide { padding: 5rem 1.5rem 2rem; }
+    .context-grid, .hooks-grid, .vue-api-grid,
+    .advantages-grid, .counter-grid { grid-template-columns: 1fr; }
+    .slide::before { font-size: 8rem; right: 0.5rem; }
+    nav { padding: 1rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<nav>
+  <span class="nav-logo">React Hooks · Vue Composition API</span>
+  <div class="nav-dots" id="navDots">
+    <button class="nav-dot active" onclick="scrollToSlide(0)"></button>
+    <button class="nav-dot" onclick="scrollToSlide(1)"></button>
+    <button class="nav-dot" onclick="scrollToSlide(2)"></button>
+    <button class="nav-dot" onclick="scrollToSlide(3)"></button>
+    <button class="nav-dot" onclick="scrollToSlide(4)"></button>
+    <button class="nav-dot" onclick="scrollToSlide(5)"></button>
+  </div>
+</nav>
+
+<!-- ═══════════════ SLIDE 1 – HERO ═══════════════ -->
+<section class="slide" id="slide-1" data-num="01">
+  <p class="hero-eyebrow">Développement Frontend Moderne</p>
+  <h1 class="hero-title">
+    <span class="react-color">React Hooks</span>
+    <span class="vs">vs</span>
+    <br>
+    <span class="vue-color">Vue Composition API</span>
+  </h1>
+  <p class="hero-subtitle">
+    Deux approches modernes pour organiser la logique d'état et de cycle de vie dans des composants maintenables et réutilisables.
+  </p>
+  <div class="hero-badges">
+    <span class="badge badge-react">React 16.8+</span>
+    <span class="badge badge-vue">Vue 3.0+</span>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 2 – CONTEXTE ═══════════════ -->
+<section class="slide" id="slide-2" data-num="02">
+  <p class="section-label">Section 01 — Contexte</p>
+  <h2 class="section-title">Avant la révolution</h2>
+  <div class="slide-divider divider-both"></div>
+  <div class="context-grid">
+    <div class="context-card react-card">
+      <span class="card-icon">⚛️</span>
+      <h3 class="card-title">React — Classes Components</h3>
+      <p class="card-body">
+        Avant les Hooks, React reposait sur des <code>class</code> ES6 héritant de <code>React.Component</code>. La logique était fragmentée entre <code>componentDidMount</code>, <code>componentDidUpdate</code> et <code>componentWillUnmount</code>, rendant la réutilisation difficile et le code verbeux.
+      </p>
+    </div>
+    <div class="context-card vue-card">
+      <span class="card-icon">💚</span>
+      <h3 class="card-title">Vue — Options API</h3>
+      <p class="card-body">
+        Vue 2 organisait les composants via des options séparées : <code>data()</code>, <code>methods</code>, <code>computed</code>, <code>watch</code>. Pratique pour les petits composants, mais la logique liée à une même fonctionnalité se retrouvait éparpillée entre plusieurs blocs.
+      </p>
+    </div>
+    <div class="context-card" style="border-top: 3px solid var(--accent); grid-column: 1 / -1;">
+      <span class="card-icon">🚧</span>
+      <h3 class="card-title">Le problème commun</h3>
+      <p class="card-body">
+        Les deux approches souffraient du même défaut : la <strong style="color:var(--text)">réutilisation de logique stateful</strong> était complexe (mixins, HOC, render props pour React) et le code devenait difficile à lire sur de gros composants. Les Hooks et la Composition API apportent une solution élégante.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 3 – REACT HOOKS ═══════════════ -->
+<section class="slide" id="slide-3" data-num="03">
+  <p class="section-label">Section 02 — React</p>
+  <h2 class="section-title"><span class="react-color">React Hooks</span></h2>
+  <div class="slide-divider divider-react"></div>
+  <div class="hooks-grid">
+    <div>
+      <div class="hooks-list">
+        <div class="hook-item">
+          <span class="hook-name">useState</span>
+          <span class="hook-desc">Déclare une variable d'état locale dans un composant fonctionnel. Retourne la valeur et une fonction de mise à jour.</span>
+        </div>
+        <div class="hook-item">
+          <span class="hook-name">useEffect</span>
+          <span class="hook-desc">Gère les effets de bord (fetch, abonnements, DOM). Remplace componentDidMount, componentDidUpdate et componentWillUnmount.</span>
+        </div>
+        <div class="hook-item">
+          <span class="hook-name">Custom Hooks</span>
+          <span class="hook-desc">Fonctions préfixées <code style="color:var(--react);font-family:'Space Mono',monospace;font-size:0.8em">use*</code> qui encapsulent et réutilisent de la logique stateful entre composants.</span>
+        </div>
+      </div>
+      <div class="rules-box">
+        <p class="rules-title">⚠ Règles des Hooks</p>
+        <div class="rules-list">
+          <div class="rule-item"><span class="rule-bullet"></span> Appeler uniquement au niveau supérieur (pas dans des boucles ou conditions)</div>
+          <div class="rule-item"><span class="rule-bullet"></span> Appeler uniquement depuis des fonctions React (composants ou custom hooks)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+        <span class="code-lang">jsx — React Hook</span>
+      </div>
+      <div class="code-body"><pre><span class="kw">import</span> { <span class="react-fn">useState</span>, <span class="react-fn">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// Hook personnalisé réutilisable</span>
+<span class="kw">function</span> <span class="fn">useWindowWidth</span>() {
+  <span class="kw">const</span> [width, setWidth] = <span class="react-fn">useState</span>(
+    window.innerWidth
+  );
+  <span class="react-fn">useEffect</span>(() => {
+    <span class="kw">const</span> handler = () =>
+      setWidth(window.innerWidth);
+    window.addEventListener(<span class="str">'resize'</span>, handler);
+    <span class="kw">return</span> () =>
+      window.removeEventListener(<span class="str">'resize'</span>, handler);
+  }, []);
+  <span class="kw">return</span> width;
+}
+
+<span class="cmt">// Composant fonctionnel</span>
+<span class="kw">function</span> <span class="fn">Compteur</span>() {
+  <span class="kw">const</span> [count, setCount] = <span class="react-fn">useState</span>(<span class="num">0</span>);
+  <span class="kw">const</span> width = <span class="fn">useWindowWidth</span>();
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;p&gt;</span>Compteur : {count}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;button</span> onClick={() =>
+        setCount(c => c + <span class="num">1</span>)}<span class="tag">&gt;</span>
+        +1
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 4 – VUE COMPOSITION ═══════════════ -->
+<section class="slide" id="slide-4" data-num="04">
+  <p class="section-label">Section 03 — Vue</p>
+  <h2 class="section-title"><span class="vue-color">Composition API</span></h2>
+  <div class="slide-divider divider-vue"></div>
+  <div class="vue-api-grid">
+    <div class="api-pill">
+      <p class="api-pill-name">ref()</p>
+      <p class="api-pill-desc">Rend réactif une valeur primitive (string, number, boolean). Accessible via <code style="font-size:0.8em">.value</code>.</p>
+    </div>
+    <div class="api-pill">
+      <p class="api-pill-name">reactive()</p>
+      <p class="api-pill-desc">Rend réactif un objet entier. Pratique pour grouper plusieurs états liés.</p>
+    </div>
+    <div class="api-pill">
+      <p class="api-pill-name">computed()</p>
+      <p class="api-pill-desc">Valeur dérivée mise en cache, recalculée uniquement si ses dépendances changent.</p>
+    </div>
+    <div class="api-pill">
+      <p class="api-pill-name">watch()</p>
+      <p class="api-pill-desc">Observe une source réactive et exécute un callback à chaque changement.</p>
+    </div>
+    <div class="api-pill">
+      <p class="api-pill-name">composables</p>
+      <p class="api-pill-desc">Fonctions réutilisables (ex : <code style="font-size:0.8em">useCounter()</code>) qui encapsulent la logique réactive.</p>
+    </div>
+    <div class="api-pill">
+      <p class="api-pill-name">onMounted()</p>
+      <p class="api-pill-desc">Lifecycle hook appelé après le montage du composant dans le DOM.</p>
+    </div>
+  </div>
+
+  <div class="code-block" style="max-width: 900px;">
+    <div class="code-header">
+      <div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+      <span class="code-lang">vue — Composition API</span>
+    </div>
+    <div class="code-body"><pre><span class="tag">&lt;script setup&gt;</span>
+<span class="kw">import</span> { <span class="vue-fn">ref</span>, <span class="vue-fn">computed</span>, <span class="vue-fn">watch</span>, <span class="vue-fn">onMounted</span> } <span class="kw">from</span> <span class="str">'vue'</span>
+
+<span class="cmt">// Composable réutilisable</span>
+<span class="kw">function</span> <span class="fn">useCounter</span>(initial = <span class="num">0</span>) {
+  <span class="kw">const</span> count  = <span class="vue-fn">ref</span>(initial)
+  <span class="kw">const</span> double = <span class="vue-fn">computed</span>(() => count.value * <span class="num">2</span>)
+  <span class="kw">const</span> inc    = () => count.value++
+  <span class="kw">const</span> dec    = () => count.value--
+  <span class="kw">return</span> { count, double, inc, dec }
+}
+
+<span class="kw">const</span> { count, double, inc, dec } = <span class="fn">useCounter</span>()
+
+<span class="vue-fn">watch</span>(count, (newVal) => {
+  console.log(<span class="str">`Compteur : <span class="kw">${</span>newVal<span class="kw">}</span>`</span>)
+})
+
+<span class="vue-fn">onMounted</span>(() => console.log(<span class="str">'Composant monté'</span>))
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;p&gt;</span>{{ count }} (double : {{ double }})<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;button</span> @click=<span class="str">"inc"</span><span class="tag">&gt;</span>+<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> @click=<span class="str">"dec"</span><span class="tag">&gt;</span>-<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/template&gt;</span></pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 5 – AVANTAGES ═══════════════ -->
+<section class="slide" id="slide-5" data-num="05">
+  <p class="section-label">Section 04 — Avantages</p>
+  <h2 class="section-title">Pourquoi adopter ces approches ?</h2>
+  <div class="slide-divider divider-both"></div>
+  <div class="advantages-grid">
+    <div class="adv-card">
+      <span class="adv-number">01</span>
+      <span class="adv-icon">🗂️</span>
+      <h3 class="adv-title">Meilleure organisation</h3>
+      <p class="adv-body">La logique liée à une même fonctionnalité est regroupée au même endroit, au lieu d'être dispersée dans des méthodes de cycle de vie ou des blocs d'options séparés.</p>
+    </div>
+    <div class="adv-card">
+      <span class="adv-number">02</span>
+      <span class="adv-icon">♻️</span>
+      <h3 class="adv-title">Réutilisation facilitée</h3>
+      <p class="adv-body">Les hooks et composables sont de simples fonctions JavaScript. Pas de mixins ambigus ni de HOC complexes : la logique stateful se partage naturellement entre composants.</p>
+    </div>
+    <div class="adv-card">
+      <span class="adv-number">03</span>
+      <span class="adv-icon">🔷</span>
+      <h3 class="adv-title">Typage TypeScript simplifié</h3>
+      <p class="adv-body">Les fonctions et variables ordinaires s'intègrent parfaitement avec TypeScript. Fini les types complexes de <code style="font-family:Space Mono,monospace;font-size:0.85em">this</code> dans les classes Vue ou React.</p>
+    </div>
+    <div class="adv-card">
+      <span class="adv-number">04</span>
+      <span class="adv-icon">🧪</span>
+      <h3 class="adv-title">Testabilité accrue</h3>
+      <p class="adv-body">Les hooks et composables peuvent être testés de façon isolée, sans avoir à monter un composant complet. Les fonctions pures sont bien plus simples à couvrir par des tests unitaires.</p>
+    </div>
+    <div class="adv-card">
+      <span class="adv-number">05</span>
+      <span class="adv-icon">📉</span>
+      <h3 class="adv-title">Moins de boilerplate</h3>
+      <p class="adv-body">Exit les classes, les constructeurs et les méthodes <code style="font-family:Space Mono,monospace;font-size:0.85em">bind(this)</code>. Le code est plus concis, lisible, et plus proche du JavaScript idiomatique.</p>
+    </div>
+    <div class="adv-card">
+      <span class="adv-number">06</span>
+      <span class="adv-icon">🤝</span>
+      <h3 class="adv-title">Interopérabilité</h3>
+      <p class="adv-body">Les deux approches coexistent avec les anciennes APIs (class components, Options API) permettant une migration progressive sans réécriture complète du projet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 6 – COMPTEUR ═══════════════ -->
+<section class="slide" id="slide-6" data-num="06">
+  <p class="section-label">Section 05 — Démonstration</p>
+  <h2 class="section-title">Un compteur, deux approches</h2>
+  <div class="slide-divider divider-both"></div>
+  <div class="counter-grid">
+
+    <!-- React -->
+    <div class="counter-panel">
+      <div class="panel-header">
+        <span class="panel-header-dot react-dot"></span>
+        <span class="panel-header-title react-text">React — useState</span>
+      </div>
+      <div class="code-block" style="border-radius: 0; border: none; border-bottom: 1px solid var(--border);">
+        <div class="code-header" style="background: #0d0d15;">
+          <div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <span class="code-lang">jsx</span>
+        </div>
+        <div class="code-body" style="font-size:0.7rem;"><pre><span class="kw">function</span> <span class="fn">Compteur</span>() {
+  <span class="kw">const</span> [count, setCount]
+    = <span class="react-fn">useState</span>(<span class="num">0</span>);
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;span&gt;</span>{count}<span class="tag">&lt;/span&gt;</span>
+      <span class="tag">&lt;button</span>
+        onClick={() => setCount(c => c+<span class="num">1</span>)}<span class="tag">&gt;</span>
+        +
+      <span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;button</span>
+        onClick={() => setCount(c => c-<span class="num">1</span>)}<span class="tag">&gt;</span>
+        -
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}</pre></div>
+      </div>
+      <div class="live-demo">
+        <span class="demo-label">Live Demo</span>
+        <span class="counter-display react-num" id="reactCount">0</span>
+        <div class="counter-controls">
+          <button class="btn btn-react" onclick="changeCount('react', -1)">−</button>
+          <button class="btn btn-react" onclick="resetCount('react')">Reset</button>
+          <button class="btn btn-react" onclick="changeCount('react', 1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vue -->
+    <div class="counter-panel">
+      <div class="panel-header">
+        <span class="panel-header-dot vue-dot"></span>
+        <span class="panel-header-title vue-text">Vue — ref()</span>
+      </div>
+      <div class="code-block" style="border-radius: 0; border: none; border-bottom: 1px solid var(--border);">
+        <div class="code-header" style="background: #0d0d15;">
+          <div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <span class="code-lang">vue</span>
+        </div>
+        <div class="code-body" style="font-size:0.7rem;"><pre><span class="tag">&lt;script setup&gt;</span>
+<span class="kw">import</span> { <span class="vue-fn">ref</span> } <span class="kw">from</span> <span class="str">'vue'</span>
+
+<span class="kw">const</span> count = <span class="vue-fn">ref</span>(<span class="num">0</span>)
+<span class="kw">const</span> inc = () => count.value++
+<span class="kw">const</span> dec = () => count.value--
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;div&gt;</span>
+    <span class="tag">&lt;span&gt;</span>{{ count }}<span class="tag">&lt;/span&gt;</span>
+    <span class="tag">&lt;button</span> @click=<span class="str">"dec"</span><span class="tag">&gt;</span>−<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;button</span> @click=<span class="str">"inc"</span><span class="tag">&gt;</span>+<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/template&gt;</span></pre></div>
+      </div>
+      <div class="live-demo">
+        <span class="demo-label">Live Demo</span>
+        <span class="counter-display vue-num" id="vueCount">0</span>
+        <div class="counter-controls">
+          <button class="btn btn-vue" onclick="changeCount('vue', -1)">−</button>
+          <button class="btn btn-vue" onclick="resetCount('vue')">Reset</button>
+          <button class="btn btn-vue" onclick="changeCount('vue', 1)">+</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="scroll-hint" id="scrollHint">
+  <span>scroll</span>
+  <div class="scroll-arrow"></div>
+</div>
+
+<script>
+  // Counter state
+  const counts = { react: 0, vue: 0 };
+
+  function changeCount(type, delta) {
+    counts[type] += delta;
+    const el = document.getElementById(type + 'Count');
+    el.textContent = counts[type];
+    el.style.transform = 'scale(1.2)';
+    setTimeout(() => el.style.transform = 'scale(1)', 150);
+  }
+
+  function resetCount(type) {
+    counts[type] = 0;
+    document.getElementById(type + 'Count').textContent = 0;
+  }
+
+  // Intersection Observer for slide animations
+  const slides = document.querySelectorAll('.slide');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  slides.forEach(s => observer.observe(s));
+
+  // Progress bar + nav dots
+  const dots = document.querySelectorAll('.nav-dot');
+  const scrollHint = document.getElementById('scrollHint');
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.body.scrollHeight - window.innerHeight;
+    const pct = (scrollTop / docHeight) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+
+    scrollHint.style.opacity = scrollTop > 100 ? '0' : '1';
+
+    // Active dot
+    slides.forEach((slide, i) => {
+      const rect = slide.getBoundingClientRect();
+      if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+        dots.forEach(d => d.classList.remove('active'));
+        dots[i]?.classList.add('active');
+      }
+    });
+  });
+
+  function scrollToSlide(i) {
+    slides[i].scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Initial visible
+  slides[0].classList.add('visible');
+</script>
+</body>
+</html>
