@@ -662,7 +662,7 @@
       <span class="card-icon">⚛️</span>
       <h3 class="card-title">React — Classes Components</h3>
       <p class="card-body">
-        Avant les Hooks, React reposait sur des <code>class</code> ES6 héritant de <code>React.Component</code>. La logique était fragmentée entre <code>componentDidMount</code>, <code>componentDidUpdate</code> et <code>componentWillUnmount</code>, rendant la réutilisation difficile et le code verbeux.
+        Avant les Hooks, React reposait sur des <code>class</code> ES6 héritant de <code>React.Component</code>. La logique était fragmentée entre <code>componentDidMount</code>, <code>componentDidUpdate</code> et <code>componentWillUnmount</code>, rendant la réutilisation difficile et le code long.
       </p>
     </div>
     <div class="context-card vue-card">
@@ -692,63 +692,17 @@
       <div class="hooks-list">
         <div class="hook-item">
           <span class="hook-name">useState</span>
-          <span class="hook-desc">Déclare une variable d'état locale dans un composant fonctionnel. Retourne la valeur et une fonction de mise à jour.</span>
+          <span class="hook-desc"> un Hook de React qui permet de créer et gérer une variable dynamique (state) dans un composant.<br> const [variable, setVariable] = useState(valeurInitiale);</span>
         </div>
         <div class="hook-item">
           <span class="hook-name">useEffect</span>
-          <span class="hook-desc">Gère les effets de bord (fetch, abonnements, DOM). Remplace componentDidMount, componentDidUpdate et componentWillUnmount.</span>
+          <span class="hook-desc">Gère les effets (eventlistener, DOM) , il permet d'executer le code apres que react affiche le composant. Remplace componentDidMount, componentDidUpdate et componentWillUnmount.</span>
         </div>
         <div class="hook-item">
           <span class="hook-name">Custom Hooks</span>
           <span class="hook-desc">Fonctions préfixées <code style="color:var(--react);font-family:'Space Mono',monospace;font-size:0.8em">use*</code> qui encapsulent et réutilisent de la logique stateful entre composants.</span>
         </div>
       </div>
-      <div class="rules-box">
-        <p class="rules-title">⚠ Règles des Hooks</p>
-        <div class="rules-list">
-          <div class="rule-item"><span class="rule-bullet"></span> Appeler uniquement au niveau supérieur (pas dans des boucles ou conditions)</div>
-          <div class="rule-item"><span class="rule-bullet"></span> Appeler uniquement depuis des fonctions React (composants ou custom hooks)</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="code-block">
-      <div class="code-header">
-        <div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
-        <span class="code-lang">jsx — React Hook</span>
-      </div>
-      <div class="code-body"><pre><span class="kw">import</span> { <span class="react-fn">useState</span>, <span class="react-fn">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>;
-
-<span class="cmt">// Hook personnalisé réutilisable</span>
-<span class="kw">function</span> <span class="fn">useWindowWidth</span>() {
-  <span class="kw">const</span> [width, setWidth] = <span class="react-fn">useState</span>(
-    window.innerWidth
-  );
-  <span class="react-fn">useEffect</span>(() => {
-    <span class="kw">const</span> handler = () =>
-      setWidth(window.innerWidth);
-    window.addEventListener(<span class="str">'resize'</span>, handler);
-    <span class="kw">return</span> () =>
-      window.removeEventListener(<span class="str">'resize'</span>, handler);
-  }, []);
-  <span class="kw">return</span> width;
-}
-
-<span class="cmt">// Composant fonctionnel</span>
-<span class="kw">function</span> <span class="fn">Compteur</span>() {
-  <span class="kw">const</span> [count, setCount] = <span class="react-fn">useState</span>(<span class="num">0</span>);
-  <span class="kw">const</span> width = <span class="fn">useWindowWidth</span>();
-
-  <span class="kw">return</span> (
-    <span class="tag">&lt;div&gt;</span>
-      <span class="tag">&lt;p&gt;</span>Compteur : {count}<span class="tag">&lt;/p&gt;</span>
-      <span class="tag">&lt;button</span> onClick={() =>
-        setCount(c => c + <span class="num">1</span>)}<span class="tag">&gt;</span>
-        +1
-      <span class="tag">&lt;/button&gt;</span>
-    <span class="tag">&lt;/div&gt;</span>
-  );
-}</pre></div>
     </div>
   </div>
 </section>
@@ -769,53 +723,16 @@
     </div>
     <div class="api-pill">
       <p class="api-pill-name">computed()</p>
-      <p class="api-pill-desc">Valeur dérivée mise en cache, recalculée uniquement si ses dépendances changent.</p>
+      <p class="api-pill-desc">une valeur calculée automatiquement à partir d’autres variables réactives</p>
     </div>
     <div class="api-pill">
       <p class="api-pill-name">watch()</p>
-      <p class="api-pill-desc">Observe une source réactive et exécute un callback à chaque changement.</p>
+      <p class="api-pill-desc">c’est une fonction de Vue qui permet de surveiller une variable réactive et d’exécuter du code automatiquement lorsqu’elle change.</p>
     </div>
     <div class="api-pill">
       <p class="api-pill-name">composables</p>
       <p class="api-pill-desc">Fonctions réutilisables (ex : <code style="font-size:0.8em">useCounter()</code>) qui encapsulent la logique réactive.</p>
     </div>
-    <div class="api-pill">
-      <p class="api-pill-name">onMounted()</p>
-      <p class="api-pill-desc">Lifecycle hook appelé après le montage du composant dans le DOM.</p>
-    </div>
-  </div>
-
-  <div class="code-block" style="max-width: 900px;">
-    <div class="code-header">
-      <div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
-      <span class="code-lang">vue — Composition API</span>
-    </div>
-    <div class="code-body"><pre><span class="tag">&lt;script setup&gt;</span>
-<span class="kw">import</span> { <span class="vue-fn">ref</span>, <span class="vue-fn">computed</span>, <span class="vue-fn">watch</span>, <span class="vue-fn">onMounted</span> } <span class="kw">from</span> <span class="str">'vue'</span>
-
-<span class="cmt">// Composable réutilisable</span>
-<span class="kw">function</span> <span class="fn">useCounter</span>(initial = <span class="num">0</span>) {
-  <span class="kw">const</span> count  = <span class="vue-fn">ref</span>(initial)
-  <span class="kw">const</span> double = <span class="vue-fn">computed</span>(() => count.value * <span class="num">2</span>)
-  <span class="kw">const</span> inc    = () => count.value++
-  <span class="kw">const</span> dec    = () => count.value--
-  <span class="kw">return</span> { count, double, inc, dec }
-}
-
-<span class="kw">const</span> { count, double, inc, dec } = <span class="fn">useCounter</span>()
-
-<span class="vue-fn">watch</span>(count, (newVal) => {
-  console.log(<span class="str">`Compteur : <span class="kw">${</span>newVal<span class="kw">}</span>`</span>)
-})
-
-<span class="vue-fn">onMounted</span>(() => console.log(<span class="str">'Composant monté'</span>))
-<span class="tag">&lt;/script&gt;</span>
-
-<span class="tag">&lt;template&gt;</span>
-  <span class="tag">&lt;p&gt;</span>{{ count }} (double : {{ double }})<span class="tag">&lt;/p&gt;</span>
-  <span class="tag">&lt;button</span> @click=<span class="str">"inc"</span><span class="tag">&gt;</span>+<span class="tag">&lt;/button&gt;</span>
-  <span class="tag">&lt;button</span> @click=<span class="str">"dec"</span><span class="tag">&gt;</span>-<span class="tag">&lt;/button&gt;</span>
-<span class="tag">&lt;/template&gt;</span></pre></div>
   </div>
 </section>
 
@@ -846,20 +763,8 @@
     <div class="adv-card">
       <span class="adv-number">04</span>
       <span class="adv-icon">🧪</span>
-      <h3 class="adv-title">Testabilité accrue</h3>
-      <p class="adv-body">Les hooks et composables peuvent être testés de façon isolée, sans avoir à monter un composant complet. Les fonctions pures sont bien plus simples à couvrir par des tests unitaires.</p>
-    </div>
-    <div class="adv-card">
-      <span class="adv-number">05</span>
-      <span class="adv-icon">📉</span>
-      <h3 class="adv-title">Moins de boilerplate</h3>
-      <p class="adv-body">Exit les classes, les constructeurs et les méthodes <code style="font-family:Space Mono,monospace;font-size:0.85em">bind(this)</code>. Le code est plus concis, lisible, et plus proche du JavaScript idiomatique.</p>
-    </div>
-    <div class="adv-card">
-      <span class="adv-number">06</span>
-      <span class="adv-icon">🤝</span>
-      <h3 class="adv-title">Interopérabilité</h3>
-      <p class="adv-body">Les deux approches coexistent avec les anciennes APIs (class components, Options API) permettant une migration progressive sans réécriture complète du projet.</p>
+      <h3 class="adv-title">Testabilité améliorée</h3>
+      <p class="adv-body">Les hooks et composables peuvent être testés de façon isolée, sans avoir à faire un composant complet. Les fonctions pures sont bien plus simples à couvrir par des tests unitaires.</p>
     </div>
   </div>
 </section>
